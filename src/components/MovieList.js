@@ -1,12 +1,16 @@
+// components/MovieList.js
 import React from 'react';
 
-const MovieList = (props) => {
+const MovieList = ({ movies }) => {
   return (
     <>
-      {props.movies.map((movie, index) => (
-        <div key={movie.imdbID} className="movie-item">
-          <img src={movie.Poster} alt={movie.Title} />
-          <h5>{movie.Title} ({movie.Year})</h5>
+      {movies.map((movie) => (
+        <div key={movie.imdbID} className="col-sm-6 col-md-4 col-lg-3 mb-4">
+          <div className="movie-card p-2">
+            <img src={movie.Poster} alt={movie.Title} className="img-fluid rounded" />
+            <h5 className="mt-2">{movie.Title}</h5>
+            <p>{movie.Year}</p>
+          </div>
         </div>
       ))}
     </>
