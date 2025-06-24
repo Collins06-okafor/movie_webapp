@@ -1,21 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MovieList from './components/MovieList';
+import MovieDetails from './components/MovieDetails';
 import LoginForm from './components/LoginForm';
 import SignupForm from './components/SignupForm';
 import './App.css';
 import MovieListHeading from './components/MovieListHeading';
 import SearchBox from './components/SearchBox';
-import { auth } from './firebase/config'; // Fixed: Added ./ to make it relative
-import { onAuthStateChanged, signOut } from 'firebase/auth';
+import AddFavourite from './components/AddFavourites';
+import { signOut } from 'firebase/auth';
+import { auth } from './firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const App = () => {
-  const [activeForm, setActiveForm] = useState(null); // 'login' | 'signup' | null
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('home');
+  const [activeForm, setActiveForm] = useState(null);
   const [user, setUser] = useState(null);
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [movies, setMovies] = useState([]);
+  const [searchValue, setSearchValue] = useState('');
+  const [favorites, setFavorites] = useState([]);
+  const [watchlist, setWatchlist] = useState([]);
 
-  const toggleForm = (formType) => {
-  setActiveForm((prevForm) => (prevForm === formType ? null : formType));
-};
+  const toggleMenu = () => setMenuOpen(!menuOpen);
+  const openForm = (formType) => setActiveForm(formType);
+  const handleMovieClick = (movie) => setSelectedMovie(movie);
+  const handleCloseMovieDetails = () => setSelectedMovie(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -24,101 +35,168 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  const handleLogout = async () => {
-    await signOut(auth);
-    alert('Logged out');
-  };
-
-  const [movies, setMovies] = useState([
-    {
-      Title: "Batman Begins",
-      Year: "2005",
-      imdbID: "tt0372784",
-      Type: "movie",
-      Poster: "https://m.media-amazon.com/images/M/MV5BODIyMDdhNTgtNDlmOC00MjUxLWE2NDItODA5MTdkNzY3ZTdhXkEyXkFqcGc@._V1_SX300.jpg"
-    },
-    {
-      Title: "The Batman",
-      Year: "2022",
-      imdbID: "tt1877830",
-      Type: "movie",
-      Poster: "https://m.media-amazon.com/images/M/MV5BMmU5NGJlMzAtMGNmOC00YjJjLTgyMzUtNjAyYmE4Njg5YWMyXkEyXkFqcGc@._V1_SX300.jpg"
-    },
-    {
-      Title: "Batman v Superman: Dawn of Justice",
-      Year: "2016",
-      imdbID: "tt2975590",
-      Type: "movie",
-      Poster: "https://m.media-amazon.com/images/M/MV5BZTJkYjdmYjYtOGMyNC00ZGU1LThkY2ItYTc1OTVlMmE2YWY1XkEyXkFqcGc@._V1_SX300.jpg"
-    },
-    {
-      Title: "Batman",
-      Year: "1989",
-      imdbID: "tt0096895",
-      Type: "movie",
-      Poster: "https://m.media-amazon.com/images/M/MV5BYzZmZWViM2EtNzhlMi00NzBlLWE0MWEtZDFjMjk3YjIyNTBhXkEyXkFqcGc@._V1_SX300.jpg"
+  useEffect(() => {
+    if (selectedTab === 'movies') {
+      setTimeout(() => {
+        const el = document.getElementById('movie-results');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
     }
-  ]);
-  const [searchValue, setSearchValue] = useState ('');
+  }, [selectedTab]);
 
   const getMovieRequest = async () => {
-  const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`; // ✅ backticks!
+    const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`;
+    const response = await fetch(url);
+    const responseJson = await response.json();
+    if (responseJson.Search) {
+      setMovies(responseJson.Search);
+    }
+  };
 
-  const response = await fetch(url);
-  const responseJson = await response.json();
+  useEffect(() => {
+    if (searchValue) {
+      getMovieRequest();
+    }
+  }, [searchValue]);
 
-  if (responseJson.Search) {
-    setMovies(responseJson.Search);
+  const toggleFavorite = (movie) => {
+    if (!user) return alert("Login to manage favorites");
+    setFavorites((prev) =>
+      prev.find((m) => m.imdbID === movie.imdbID)
+        ? prev.filter((m) => m.imdbID !== movie.imdbID)
+        : [...prev, movie]
+    );
+  };
+
+  const toggleWatchlist = (movie) => {
+    if (!user) return alert("Login to manage watchlist");
+    setWatchlist((prev) =>
+      prev.find((m) => m.imdbID === movie.imdbID)
+        ? prev.filter((m) => m.imdbID !== movie.imdbID)
+        : [...prev, movie]
+    );
+  };
+
+  const handleLogout = async () => {
+  try {
+    await signOut(auth);
+    setUser(null); // Clear user state
+  } catch (error) {
+    console.error("Logout failed:", error);
   }
 };
 
-  useEffect(() => {
-    getMovieRequest(searchValue);
-  }, [searchValue]);
 
   return (
     <div>
-      {/* Top buttons */}
-      {!user && (
-        <>
-          <button className="top-right-button" onClick={() => toggleForm('login')}>
-            {activeForm === 'login' ? 'Close Login' : 'Login'}
-          </button>
-          <button className="top-right-button signup-btn" onClick={() => toggleForm('signup')}>
-            {activeForm === 'signup' ? 'Close Signup' : 'Sign Up'}
-          </button>
-        </>
-      )}
-
-      {user && (
+      {/* Auth Buttons */}
+      {!user ? (
+        <div className="auth-buttons">
+          <button className="top-right-button" onClick={() => openForm('login')}>Login</button>
+          <button className="top-right-button signup-btn" onClick={() => openForm('signup')}>Sign Up</button>
+        </div>
+      ) : (
         <div className="top-user-info">
           <p>Welcome, {user.email}</p>
-          <button onClick={handleLogout}>Logout</button>
+          <button className="logout-btn" onClick={handleLogout}>Logout</button>
         </div>
       )}
+
+      {/* Menu Bar */}
+      <div className="menu-container">
+        <div className="menu-toggle" onClick={toggleMenu}>☰</div>
+        <div className={`menu-bar ${menuOpen ? 'open' : ''}`}>
+          <button onClick={() => setSelectedTab('home')} className={selectedTab === 'home' ? 'active' : ''}>Home</button>
+          <button onClick={() => setSelectedTab('movies')} className={selectedTab === 'movies' ? 'active' : ''}>Movies</button>
+          <button onClick={() => setSelectedTab('favorites')} className={selectedTab === 'favorites' ? 'active' : ''}>Favorites</button>
+          <button onClick={() => setSelectedTab('watchlist')} className={selectedTab === 'watchlist' ? 'active' : ''}>Watchlist</button>
+        </div>
+      </div>
 
       {/* Modals */}
       {activeForm === 'login' && (
         <div className="modal-overlay">
-          <LoginForm switchForm={toggleForm} />
+          <LoginForm switchForm={setActiveForm} />
         </div>
       )}
       {activeForm === 'signup' && (
         <div className="modal-overlay">
-          <SignupForm switchForm={toggleForm} />
+          <SignupForm switchForm={setActiveForm} />
+        </div>
+      )}
+      {selectedMovie && (
+        <MovieDetails movie={selectedMovie} onClose={handleCloseMovieDetails} user={user} />
+      )}
+
+      {/* Home Page */}
+      {selectedTab === 'home' && (
+        <div className="home-hero">
+          <div className="overlay">
+            <h1 className="hero-title">Welcome to C-Box 🎬</h1>
+            <input
+              type="text"
+              className="hero-search"
+              placeholder="Search for movies..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setSelectedTab('movies');
+                }
+              }}
+            />
+          </div>
         </div>
       )}
 
-      {/* Movie list */}
-      <div className='container-fluid movie-app'>
-        <div className='row d-flex align-items-center mt-4 mb-4'>
-          <MovieListHeading heading='Movies' />
-          <SearchBox searchValue={searchValue} setSearchValue={setSearchValue}/>
+      {/* Movies Tab */}
+      {selectedTab === 'movies' && (
+        <div className='container-fluid movie-app'>
+          <div className='row d-flex align-items-center mt-4 mb-4'>
+            <MovieListHeading heading='Movies' />
+            <SearchBox searchValue={searchValue} setSearchValue={setSearchValue} />
           </div>
-        <div className='row'>
-          <MovieList movies={movies} />
+          <div className='row' id="movie-results">
+            <MovieList
+              movies={movies}
+              onMovieClick={handleMovieClick}
+              onToggleFavorite={toggleFavorite}
+              favorites={favorites}
+              favouriteComponent={AddFavourite}
+            />
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Favorites Tab */}
+      {selectedTab === 'favorites' && (
+        <div className='container-fluid movie-app'>
+          <div className='row d-flex align-items-center mt-4 mb-4'>
+            <MovieListHeading heading='Your Favorites' />
+          </div>
+          <div className='row'>
+            {favorites.length > 0 ? (
+              <MovieList
+                movies={favorites}
+                onMovieClick={handleMovieClick}
+                onToggleFavorite={toggleFavorite}
+                favorites={favorites}
+                favouriteComponent={AddFavourite}
+              />
+            ) : (
+              <p className="text-center w-100">No favorites yet.</p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Watchlist Tab */}
+      {selectedTab === 'watchlist' && (
+        <div className="watchlist-section">
+          <h2>Watchlist</h2>
+          <p>No movies in your watchlist.</p>
+        </div>
+      )}
     </div>
   );
 };

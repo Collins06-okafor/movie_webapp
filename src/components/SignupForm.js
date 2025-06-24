@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { auth } from '../firebase/config'; // Fixed: Import auth from config file
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
@@ -8,6 +8,21 @@ const SignupForm = ({ switchForm }) => {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+  const formRef = useRef(null);
+
+  // Handle clicking outside the form
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (formRef.current && !formRef.current.contains(event.target)) {
+        switchForm(null); // Close the modal
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [switchForm]);
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -26,7 +41,7 @@ const SignupForm = ({ switchForm }) => {
   };
 
   return (
-    <div className="auth-form">
+    <div className="auth-form" ref={formRef}>
       <h2>Sign Up</h2>
       <form onSubmit={handleSignup}>
         <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required /><br />
