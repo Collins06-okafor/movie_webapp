@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { auth,signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase/config'; // Fixed: Import auth from config file
+import { signInWithEmailAndPassword } from 'firebase/auth'; // Fixed: Import from firebase/auth
 
 const LoginForm = ({ switchForm }) => {
   const [email, setEmail] = useState("");

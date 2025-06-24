@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { auth } from '../firebase/config'; // Fixed: Import auth from config file
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 const SignupForm = ({ switchForm }) => {

@@ -6,7 +6,7 @@ import SignupForm from './components/SignupForm';
 import './App.css';
 import MovieListHeading from './components/MovieListHeading';
 import SearchBox from './components/SearchBox';
-import { auth } from 'firebase/config';
+import { auth } from './firebase/config'; // Fixed: Added ./ to make it relative
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 
 const App = () => {
@@ -28,7 +28,6 @@ const App = () => {
     await signOut(auth);
     alert('Logged out');
   };
-
 
   const [movies, setMovies] = useState([
     {
@@ -73,10 +72,8 @@ const App = () => {
   }
 };
 
-
   useEffect(() => {
     getMovieRequest(searchValue);
-
   }, [searchValue]);
 
   return (
@@ -111,9 +108,6 @@ const App = () => {
           <SignupForm switchForm={toggleForm} />
         </div>
       )}
-
-
-
 
       {/* Movie list */}
       <div className='container-fluid movie-app'>
