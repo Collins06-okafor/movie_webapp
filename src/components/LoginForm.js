@@ -23,17 +23,29 @@ const LoginForm = ({ switchForm }) => {
   }, [switchForm]);
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      alert("Login successful!");
-      switchForm(null); // closes the modal
-      // Optional: close modal or redirect here
-    } catch (err) {
-      setError("Invalid email or password");
-      console.error("Login error:", err.message);
-    }
-  };
+  e.preventDefault();
+
+  const strongPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  if (!strongPasswordRegex.test(password)) {
+    setError("Password must be at least 8 characters and include letters, numbers, and a special character.");
+    return;
+  }
+
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    alert("Login successful!");
+    switchForm(null); // closes the modal
+  } catch (err) {
+    setError("Invalid email or password");
+    console.error("Login error:", err.message);
+  }
+};
+
+<small style={{ color: "#666" }}>
+  Must be at least 8 characters, include a number, a letter, and a special character.
+</small>
+
 
   return (
     <div className="auth-form" ref={formRef}>

@@ -25,20 +25,33 @@ const SignupForm = ({ switchForm }) => {
   }, [switchForm]);
 
   const handleSignup = async (e) => {
-    e.preventDefault();
-    if (password !== confirm) {
-      setError("Passwords do not match");
-      return;
-    }
+  e.preventDefault();
 
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      alert("Signup successful!");
-      switchForm('login');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  const strongPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+  if (password !== confirm) {
+    setError("Passwords do not match");
+    return;
+  }
+
+  if (!strongPasswordRegex.test(password)) {
+    setError("Password must be at least 8 characters and include letters, numbers, and a special character.");
+    return;
+  }
+
+  try {
+    await createUserWithEmailAndPassword(auth, email, password);
+    alert("Signup successful!");
+    switchForm('login');
+  } catch (err) {
+    setError(err.message);
+  }
+};
+
+<small style={{ color: "#666" }}>
+  Must be at least 8 characters, include a number, a letter, and a special character.
+</small>
+
 
   return (
     <div className="auth-form" ref={formRef}>

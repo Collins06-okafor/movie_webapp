@@ -114,19 +114,28 @@ body {
   right: 20px;
   background: #1010aa;
   color: white;
-  padding: 10px 20px;
+  padding: 8px 15px;
   border-radius: 6px;
   z-index: 1000;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-user-info p {
+  margin: 0;
+  white-space: nowrap;
 }
 
 .top-user-info button {
-  margin-left: 10px;
   background-color: #dc3545;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
+  font-size: 0.8rem;
 }
 
 /* Movie Details Modal Styles */
@@ -299,6 +308,14 @@ body {
     width: 95%;
     margin: 10px;
   }
+
+  .top-user-info {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 10px;
+    justify-content: center;
+  }
 }
 
 .menu-container {
@@ -416,6 +433,17 @@ body {
   z-index: 10;
 }
 
+.watchlist-button {
+  position: absolute;
+  top: 10px;
+  right: 50px;
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  z-index: 10;
+}
+
 .logout-btn {
   margin-left: 10px;
   padding: 3px 10px;
@@ -424,5 +452,140 @@ body {
   border: none;
   border-radius: 4px;
   cursor: pointer;
+}
+
+.watchlist-section {
+  padding: 20px;
+  min-height: 60vh;
+}
+
+.watchlist-section h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: white;
+}
+
+.empty-watchlist {
+  text-align: center;
+  color: #ccc;
+  font-size: 1.2rem;
+  margin-top: 50px;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Toast container to handle multiple toasts */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Modal overlay styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .toast-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+  }
+  
+  .toast-container > div {
+    max-width: none !important;
+    min-width: none !important;
+  }
+}
+
+.toggle-details-btn {
+  margin: 1rem 0;
+  padding: 8px 16px;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.favorite-button,
+.watchlist-button {
+  position: absolute;
+  top: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.favorite-button {
+  right: 40px;
+}
+
+.watchlist-button {
+  right: 10px;
+}
+
+.password-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-group input {
+  flex: 1;
+  padding-right: 30px;
+}
+
+.eye-icon {
+  position: absolute;
+  right: 10px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1.2rem;
 }
 

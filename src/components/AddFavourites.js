@@ -1,15 +1,15 @@
 import React from 'react';
 
-const AddFavourite = () => {
+const AddFavourite = ({ isFavorite }) => {
   return (
     <>
-      <span className='mr-2'>Add to Favourites</span>
+      <span className='mr-2'>{isFavorite ? 'Remove from Favourites' : 'Add to Favourites'}</span>
       <svg
         width='1em'
         height='1em'
         viewBox='0 0 16 16'
         className='bi bi-heart-fill'
-        fill='currentColor'
+        fill={isFavorite ? 'red' : 'gray'}
         xmlns='http://www.w3.org/2000/svg'
       >
         <path
