@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { auth } from '../firebase/config'; // Fixed: Import auth from config file
+import { auth } from '../firebase/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
 const SignupForm = ({ switchForm, onSignupSuccess }) => {
@@ -25,47 +25,73 @@ const SignupForm = ({ switchForm, onSignupSuccess }) => {
   }, [switchForm]);
 
   const handleSignup = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const strongPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    const strongPasswordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
-  if (password !== confirm) {
-    setError("Passwords do not match");
-    return;
-  }
+    if (password !== confirm) {
+      setError("Passwords do not match");
+      return;
+    }
 
-  if (!strongPasswordRegex.test(password)) {
-    setError("Password must be at least 8 characters and include letters, numbers, and a special character.");
-    return;
-  }
+    if (!strongPasswordRegex.test(password)) {
+      setError("Password must be at least 8 characters and include letters, numbers, and a special character.");
+      return;
+    }
 
-  try {
-    await createUserWithEmailAndPassword(auth, email, password);
-    onSignupSuccess(); // ✅ Calls toast from App
-    switchForm('login'); // open login form
-  } catch (err) {
-    setError(err.message);
-  }
-
-};
-
-<small style={{ color: "#666" }}>
-  Must be at least 8 characters, include a number, a letter, and a special character.
-</small>
-
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      onSignupSuccess();
+      switchForm('login');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   return (
-    <div className="auth-form" ref={formRef}>
-      <h2>Sign Up</h2>
-      <form onSubmit={handleSignup}>
-        <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required /><br />
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required /><br />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required /><br />
-        <input type="password" placeholder="Confirm Password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required /><br />
-        <button type="submit">Sign Up</button>
-      </form>
-      {error && <p style={{ color: "red" }}>{error}</p>}
-      <p>Already have an account? <span className="form-link" onClick={() => switchForm('login')}>Login</span></p>
+    <div className="auth-overlay">
+      <div className="auth-form" ref={formRef}>
+        <h2>Sign Up</h2>
+        <form onSubmit={handleSignup}>
+          <input 
+            type="text" 
+            placeholder="Username" 
+            value={username} 
+            onChange={(e) => setUsername(e.target.value)} 
+            required 
+          />
+          <input 
+            type="email" 
+            placeholder="Email" 
+            value={email} 
+            onChange={(e) => setEmail(e.target.value)} 
+            required 
+          />
+          <input 
+            type="password" 
+            placeholder="Password" 
+            value={password} 
+            onChange={(e) => setPassword(e.target.value)} 
+            required 
+          />
+          <input 
+            type="password" 
+            placeholder="Confirm Password" 
+            value={confirm} 
+            onChange={(e) => setConfirm(e.target.value)} 
+            required 
+          />
+          <small style={{ color:"red", display: "block", marginBottom: "10px" }}>
+            Must be at least 8 characters, include a number, a letter, and a special character.
+          </small>
+          <button type="submit">Sign Up</button>
+        </form>
+        {error && <p style={{ color: "red" }}>{error}</p>}
+        <p>
+          Already have an account? 
+          <span className="form-link" onClick={() => switchForm('login')}> Login</span>
+        </p>
+      </div>
     </div>
   );
 };

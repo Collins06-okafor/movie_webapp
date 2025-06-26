@@ -23,7 +23,9 @@ const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
       zIndex: 9999,
       boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
       animation: 'slideInRight 0.3s ease-out',
-      cursor: 'pointer'
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center'
     };
 
     const typeStyles = {
@@ -36,13 +38,22 @@ const Toast = ({ message, type = 'info', duration = 3000, onClose }) => {
     return { ...baseStyle, ...typeStyles[type] };
   };
 
+  const closeButtonStyle = {
+    marginLeft: '15px',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    background: 'none',
+    border: 'none',
+    color: 'inherit'
+  };
+
   return (
-    <div style={getToastStyle()} onClick={onClose}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>{message}</span>
-        <span style={{ marginLeft: '10px', opacity: 0.7 }}>×</span>
-      </div>
+    <div style={getToastStyle()}>
+      <span>{message}</span>
+      <button style={closeButtonStyle} onClick={onClose} aria-label="Close toast">×</button>
     </div>
   );
 };
+
 export default Toast;

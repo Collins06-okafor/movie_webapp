@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MovieList from './components/MovieList';
 import MovieDetails from './components/MovieDetails';
@@ -15,8 +15,10 @@ import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import AgeVerification from './components/AgeVerification';
+import Profile from './components/Profile'; // adjust path as needed
 
 
+//import backgroundImage from '../images/background.png';
 
 const App = () => {
   const [isAgeVerified, setIsAgeVerified] = useState(false);
@@ -32,42 +34,50 @@ const App = () => {
   const [watchlist, setWatchlist] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
-  
+  const [userMenuOpen, setUserMenuOpen] = useState(false); // 👈 for avatar dropdown
+
+  // Create ref for the dropdown container
+  const dropdownRef = useRef(null);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
-  const openForm = (formType) => setActiveForm(formType);
+  const openForm = (formType) => {
+    setActiveForm((prevForm) => (prevForm === formType ? null : formType));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const getInitials = (email) => {
+    const name = email.split('@')[0].replace(/[^a-zA-Z ]/g, '').trim();
+    const parts = name.split(/[._\s]+/); // handles john.doe or john doe
+    return parts.slice(0, 2).map(p => p[0]?.toUpperCase()).join('');
+  };
+
   const handleMovieClick = (movie) => setSelectedMovie(movie);
   const handleCloseMovieDetails = () => setSelectedMovie(null);
   const hasSearchResults = movies && movies.length > 0;
   const defaultKeywords = ['batman', 'spider', 'star', 'love', 'war', 'future', 'dream', 'ghost', 'alien', 'dragon'];
 
   const fetchRandomMovies = async () => {
-  const randomKeyword = defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
-  const url = `http://www.omdbapi.com/?s=${randomKeyword}&apikey=9733aa05`;
-  const response = await fetch(url);
-  const data = await response.json();
-  if (data.Search) {
-    setMovies(data.Search);
-  }
-};
+    const randomKeyword = defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
+    const url = `http://www.omdbapi.com/?s=${randomKeyword}&apikey=9733aa05`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.Search) {
+      setMovies(data.Search);
+    }
+  };
 
+  useEffect(() => {
+    if (selectedTab === 'movies' && !searchValue) {
+      fetchRandomMovies();
+    }
 
-useEffect(() => {
-  if (selectedTab === 'movies' && !searchValue) {
-    fetchRandomMovies();
-  }
-
-  if (selectedTab === 'movies') {
-    setTimeout(() => {
-      const el = document.getElementById('movie-results');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
-  }
-}, [selectedTab]);
-
-
-
-  
+    if (selectedTab === 'movies') {
+      setTimeout(() => {
+        const el = document.getElementById('movie-results');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+  }, [selectedTab]);
 
   // Toast management
   const showToast = (message, type = 'info', duration = 3000) => {
@@ -111,20 +121,54 @@ useEffect(() => {
     return () => unsubscribe();
   }, []);
 
- useEffect(() => {
-  if (selectedTab === 'movies') {
-    setTimeout(() => {
-      const input = document.querySelector('.search-center-input, .search-box input');
-      if (input) input.focus(); // ✅ Auto-focuses input field
+  useEffect(() => {
+    if (selectedTab === 'movies') {
+      setTimeout(() => {
+        const input = document.querySelector('.search-center-input, .search-box input');
+        if (input) input.focus(); // ✅ Auto-focuses input field
 
-      const el = document.getElementById('movie-results');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
-  }
-}, [selectedTab]);
+        const el = document.getElementById('movie-results');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 300);
+    }
+  }, [selectedTab]);
+
+  // Fixed: Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if the click is outside the dropdown container
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+
+    // Only add event listener if menu is open
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    // Cleanup event listener
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [menuOpen]); // Depend on menuOpen state
 
   useEffect(() => {
-  const fetchMovies = async () => {
+    const fetchMovies = async () => {
+      const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`;
+      const response = await fetch(url);
+      const responseJson = await response.json();
+      if (responseJson.Search) {
+        setMovies(responseJson.Search);
+      }
+    };
+
+    if (searchValue) {
+      fetchMovies();
+    }
+  }, [searchValue]);
+
+  const getMovieRequest = async () => {
     const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`;
     const response = await fetch(url);
     const responseJson = await response.json();
@@ -132,22 +176,6 @@ useEffect(() => {
       setMovies(responseJson.Search);
     }
   };
-
-  if (searchValue) {
-    fetchMovies();
-  }
-}, [searchValue]);
-
-const getMovieRequest = async () => {
-  const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`;
-  const response = await fetch(url);
-  const responseJson = await response.json();
-  if (responseJson.Search) {
-    setMovies(responseJson.Search);
-  }
-  
-};
-
 
   const toggleFavorite = (movie) => {
     if (!user) {
@@ -223,11 +251,11 @@ const getMovieRequest = async () => {
       `Thanks for rating "${movieTitle}" ${rating} stars!${review ? '\n\nYour review: ' + review : ''}`,
       'success'
     );
-    const openLoginForm = () => {
-    setSelectedMovie(null);      // ✅ closes movie modal
-    setActiveForm('login');      // ✅ opens login modal
-    };
+  };
 
+  const openLoginForm = () => {
+    setSelectedMovie(null);      // ✅ close movie details modal
+    setActiveForm('login');      // ✅ open login form modal
   };
 
   return (
@@ -240,13 +268,12 @@ const getMovieRequest = async () => {
               key={toast.id}
               message={toast.message}
               type={toast.type}
-              duration={toast.duration}
+              duration={1500}
               onClose={() => removeToast(toast.id)}
             />
           ))}
         </div>
       )}
-
 
       {/* Modal */}
       <Modal
@@ -275,46 +302,77 @@ const getMovieRequest = async () => {
 
       {/* Auth Buttons */}
       <div className="menu-container">
-  <div className="menu-toggle" onClick={toggleMenu}>☰</div>
-  <div className={`menu-bar ${menuOpen ? 'open' : ''}`}>
-    <button onClick={() => setSelectedTab('home')} className={selectedTab === 'home' ? 'active' : ''}>Home</button>
-    <button onClick={() => setSelectedTab('movies')} className={selectedTab === 'movies' ? 'active' : ''}>Movies</button>
-    <button onClick={() => setSelectedTab('favorites')} className={selectedTab === 'favorites' ? 'active' : ''}>Favorites</button>
-    <button onClick={() => setSelectedTab('watchlist')} className={selectedTab === 'watchlist' ? 'active' : ''}>Watchlist</button>
+        <div className="menu-toggle" onClick={toggleMenu}>☰</div>
+        <div className={`menu-bar ${menuOpen ? 'open' : ''}`}>
+          {/* Menu Links */}
+          <button onClick={() => setSelectedTab('home')} className={selectedTab === 'home' ? 'active' : ''}>Home</button>
+          <button onClick={() => setSelectedTab('movies')} className={selectedTab === 'movies' ? 'active' : ''}>Movies</button>
+          <button onClick={() => setSelectedTab('favorites')} className={selectedTab === 'favorites' ? 'active' : ''}>Favorites</button>
+          <button onClick={() => setSelectedTab('watchlist')} className={selectedTab === 'watchlist' ? 'active' : ''}>Watchlist</button>
 
-    {/* Auth buttons now inside menu */}
-    <div className="auth-controls">
-      {!user ? (
-        <>
-          <button className="menu-auth-btn" onClick={() => openForm('login')}>Login</button>
-          <button className="menu-auth-btn" onClick={() => openForm('signup')}>Sign Up</button>
-        </>
-      ) : (
-        <>
-          <span className="menu-user">Hi, {user.email.split('@')[0]}</span>
-          <button className="menu-auth-btn" onClick={handleLogout}>Logout</button>
-        </>
-      )}
-    </div>
-  </div>
-</div>
+          {/* Right-aligned avatar and greeting */}
+          <div className="menu-right">
+            {user ? (
+              <div className="user-avatar-dropdown" ref={dropdownRef}>
+                <div className="user-avatar" onClick={() => setMenuOpen(prev => !prev)}>
+                  {getInitials(user.email)}
+                </div>
 
-
+                {menuOpen && (
+                  <div className="user-dropdown-menu">
+                    <div className="user-email">{user.email}</div>
+                    <hr />
+                    <button onClick={() => {
+                      setMenuOpen(false);
+                      showModal("Profile", "This is your profile section.");
+                    }}>
+                      👤 Profile
+                    </button>
+                    <button onClick={() => {
+                      setMenuOpen(false);
+                      showModal("Account Settings", "Manage your preferences here.");
+                    }}>
+                      ⚙️ Account Settings
+                    </button>
+                    <button onClick={() => {
+                      setMenuOpen(false);
+                      setActiveForm('login');
+                    }}>
+                      🔁 Switch User
+                    </button>
+                    <button onClick={() => {
+                      setMenuOpen(false);
+                      handleLogout();
+                    }}>
+                      🚪 Log Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="auth-controls">
+                <button className="menu-auth-btn" onClick={() => openForm('login')}>Login</button>
+                <button className="menu-auth-btn" onClick={() => openForm('signup')}>Sign Up</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       {/* Modals */}
       {/* Login Modal */}
       {activeForm === 'login' && (
-        <div className="modal-overlay login-modal-overlay">
-          <LoginForm 
-            switchForm={setActiveForm} 
-            onLoginSuccess={handleLoginSuccess}
+        <div className="modal-overlay">
+          <LoginForm
+            switchForm={openForm}
+            onLoginSuccess={handleLoginSuccess} // ✅ Must be passed in
           />
         </div>
       )}
 
       {/* Signup Modal */}
       {activeForm === 'signup' && (
-        <div className="modal-overlay signup-modal-overlay">
+        <div className="modal-overlay">
           <SignupForm 
             switchForm={setActiveForm} 
             onSignupSuccess={handleSignupSuccess}
@@ -327,11 +385,9 @@ const getMovieRequest = async () => {
           movie={selectedMovie}
           onClose={handleCloseMovieDetails}
           user={user}
-          switchForm={openForm} // ✅ correct
+          switchForm={openLoginForm} // ✅ fixed
         />
       )}
-
-
 
       {/* Home Page */}
       {selectedTab === 'home' && (
@@ -356,50 +412,51 @@ const getMovieRequest = async () => {
 
       {/* Movies Page */}
       {selectedTab === 'movies' && (
-          <>
-            {!hasSearchResults ? (
-              <div className="movie-search-center">
-                <input
-                  type="text"
-                  className="search-center-input"
-                  placeholder="Search for movies..."
-                  value={searchValue}
-                  onChange={(e) => setSearchValue(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      getMovieRequest(); // or setSelectedTab('movies');
-                    }
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="container-fluid movie-app">
-                <div className="row justify-content-between align-items-center mb-3 px-3">
-                  <MovieListHeading heading="Search Results" />
+        <>
+          {!hasSearchResults ? (
+            <div className="movie-search-center">
+              <input
+                type="text"
+                className="search-center-input"
+                placeholder="Search for movies..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    getMovieRequest(); // or setSelectedTab('movies');
+                  }
+                }}
+              />
+            </div>
+          ) : (
+            <div className="row justify-content-center align-items-center my-4 px-3">
+              <div className="row justify-content-between align-items-center mb-3 px-3">
+                <div className="text-center">
                   <SearchBox searchValue={searchValue} setSearchValue={setSearchValue} />
                 </div>
-                <div className="row">
-                  <MovieList
-                    movies={movies}
-                    favouriteComponent={AddFavourite}
-                    handleFavouritesClick={toggleFavorite}
-                    watchlistComponent={AddToWatchlist}
-                    handleWatchlistClick={toggleWatchlist}
-                    onMovieClick={handleMovieClick}
-                    favorites={favorites}
-                    watchlist={watchlist}
-                  />
-                </div>
               </div>
-            )}
-          </>
-        )}
+              <div className="row">
+                <MovieList
+                  movies={movies}
+                  favouriteComponent={AddFavourite}
+                  handleFavouritesClick={toggleFavorite}
+                  watchlistComponent={AddToWatchlist}
+                  handleWatchlistClick={toggleWatchlist}
+                  onMovieClick={handleMovieClick}
+                  favorites={favorites}
+                  watchlist={watchlist}
+                />
+              </div>
+            </div>
+          )}
+        </>
+      )}
 
       {/* Favorites Page */}
       {selectedTab === 'favorites' && (
         <div className="container-fluid movie-app">
           <div className="row">
-            <MovieListHeading heading="Your Favorites" />
+            <MovieListHeading heading="" />
           </div>
           <div className="row">
             {favorites.length > 0 ? (
@@ -427,7 +484,7 @@ const getMovieRequest = async () => {
       {selectedTab === 'watchlist' && (
         <div className="container-fluid movie-app">
           <div className="row">
-            <MovieListHeading heading="Your Watchlist" />
+            <MovieListHeading heading="" />
           </div>
           <div className="row">
             {watchlist.length > 0 ? (

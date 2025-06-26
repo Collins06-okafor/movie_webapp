@@ -65,3 +65,27 @@
   margin-top: 10px;
   font-weight: bold;
 }
+
+/* Center the recaptcha box and add spacing */
+.age-verification-modal .grecaptcha-badge,
+.age-verification-modal .g-recaptcha {
+  margin: 10px auto 20px;
+  display: block;
+}
+
+/* Optional: Override reCAPTCHA checkbox size (if needed) */
+.age-verification-modal iframe[src*="recaptcha"] {
+  width: 304px !important; /* default widget width */
+  height: 78px !important; /* default widget height */
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Style the error message below the captcha */
+.age-verification-error {
+  color: #ff4d4f; /* bright red for errors */
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+}

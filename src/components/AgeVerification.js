@@ -1,15 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import './AgeVerification.css';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const AgeVerification = ({ onVerify }) => {
   const [age, setAge] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [captchaValue, setCaptchaValue] = useState(null);
+  const recaptchaRef = useRef(null);
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const numericAge = parseInt(age);
     if (isNaN(numericAge)) {
       setErrorMessage('Please enter a valid number.');
+      return;
+    }
+
+    if (!captchaValue) {
+      setErrorMessage('Please verify that you are not a robot.');
       return;
     }
 
@@ -18,6 +27,11 @@ const AgeVerification = ({ onVerify }) => {
     } else {
       setErrorMessage('You are not of age to access this site.');
     }
+  };
+
+  const onCaptchaChange = (value) => {
+    setCaptchaValue(value);
+    if (errorMessage) setErrorMessage('');
   };
 
   return (
@@ -32,11 +46,19 @@ const AgeVerification = ({ onVerify }) => {
             value={age}
             onChange={(e) => {
               setAge(e.target.value);
-              setErrorMessage(''); // clear error on change
+              setErrorMessage('');
             }}
             min="1"
             required
           />
+          
+          {/* Add reCAPTCHA */}
+          <ReCAPTCHA
+            sitekey="6LelLW4rAAAAAANsrREmpHhuo72g19aWpidLI_y3"
+            onChange={onCaptchaChange}
+            ref={recaptchaRef}
+          />
+
           {errorMessage && <p className="age-verification-error">{errorMessage}</p>}
           <button type="submit">Enter</button>
         </form>
