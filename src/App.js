@@ -20,6 +20,8 @@ import AccountSettings from './components/AccountSettings';
 import './i18n'; 
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Link, useLocation } from 'react-router-dom';
+import Footer from './components/Footer';
+
 
 
 
@@ -421,24 +423,28 @@ const App = () => {
 
       {/* Home Page */}
       {selectedTab === 'home' && (
-        <div className="home-hero">
-          <div className="overlay">
-            <h1 className="hero-title">Welcome to C-Box 🎬</h1>
-            <input
-              type="text"
-              className="hero-search"
-              placeholder="Search for movies..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setSelectedTab('movies');
-                }
-              }}
-            />
+        <>
+          <div className="home-hero">
+            <div className="overlay">
+              <h1 className="hero-title">Welcome to C-Box 🎬</h1>
+              <input
+                type="text"
+                className="hero-search"
+                placeholder="Search for movies..."
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setSelectedTab('movies');
+                  }
+                }}
+              />
+            </div>
           </div>
-        </div>
+          <Footer />
+        </>
       )}
+
 
       {/* Movies Page */}
       {selectedTab === 'movies' && (
