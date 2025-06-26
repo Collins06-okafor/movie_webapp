@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { addToWatchlist, getWatchlist, removeFromWatchlist } from '../services/firestore';
 import AddToWatchlist from './AddToWatchlist';
 
-const MovieDetails = ({ movie, onClose, user }) => {
+const MovieDetails = ({ movie, onClose, user, switchForm }) => {
+
   const [movieDetails, setMovieDetails] = useState(null);
   const [loading, setLoading] = useState(true);
   const [userRating, setUserRating] = useState(0);
@@ -10,6 +11,13 @@ const MovieDetails = ({ movie, onClose, user }) => {
   const [hoveredStar, setHoveredStar] = useState(0);
   const [watchlist, setWatchlist] = useState([]);
   const [showDetails, setShowDetails] = useState(false); // for toggling plot & rating
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [hasRated, setHasRated] = useState(false);
+  const [ratingMessage, setRatingMessage] = useState('');
+
+
+
+
 
   useEffect(() => {
     const fetchMovieDetails = async () => {
@@ -39,20 +47,27 @@ const MovieDetails = ({ movie, onClose, user }) => {
   }, [movie.imdbID, user]);
 
   const handleRatingSubmit = () => {
-    if (!user) return alert('Please log in to rate movies');
-    if (userRating === 0) return alert('Please select a rating');
+  if (!user) {
+    setRatingMessage('Please log in to rate movies.');
+    return;
+  }
 
-    const reviewData = {
-      rating: userRating,
-      review: userReview,
-    };
+  if (userRating === 0) {
+    setRatingMessage('Please select a star rating before submitting.');
+    return;
+  }
 
-    localStorage.setItem(`rating_${user.uid}_${movie.imdbID}`, JSON.stringify(reviewData));
-    alert(`Thanks for rating "${movie.Title}" ${userRating} stars!${userReview ? ' Your review: ' + userReview : ''}`);
-
-    setUserRating(0);
-    setUserReview('');
+  const reviewData = {
+    rating: userRating,
+    review: userReview,
   };
+
+  localStorage.setItem(`rating_${user.uid}_${movie.imdbID}`, JSON.stringify(reviewData));
+
+  setHasRated(true);
+  setRatingMessage(`Thanks for rating "${movie.Title}" ${userRating} star${userRating > 1 ? 's' : ''}!`);
+};
+
 
   const renderStars = (rating, interactive = false) => {
     const stars = [];
@@ -115,6 +130,23 @@ const MovieDetails = ({ movie, onClose, user }) => {
     );
   }
 
+  {showLoginPrompt && (
+  <div className="login-modal-overlay" onClick={() => setShowLoginPrompt(false)}>
+    <div className="login-modal" onClick={(e) => e.stopPropagation()}>
+      <h2>Please Log In</h2>
+      <p>To view more details and interact, you need to log in.</p>
+      <button className="login-confirm-btn" onClick={() => {
+        setShowLoginPrompt(false);
+        switchForm('login'); // now switch form from parent App
+      }}>
+        Go to Login
+      </button>
+      <button className="close-btn" onClick={() => setShowLoginPrompt(false)}>Cancel</button>
+    </div>
+  </div>
+)}
+
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="movie-details-modal" onClick={(e) => e.stopPropagation()}>
@@ -135,63 +167,90 @@ const MovieDetails = ({ movie, onClose, user }) => {
               <p><strong>Cast:</strong> {movieDetails.Actors}</p>
             </div>
 
+
             {/* Toggle Button */}
             <button
               onClick={() => setShowDetails(!showDetails)}
               className="toggle-details-btn"
             >
-              {showDetails ? 'Hide Details' : 'Show Details'}
+              {showDetails ? 'Hide Details' : '...more'}
             </button>
 
             {/* Conditionally show Plot & Ratings */}
             {showDetails && (
               <>
-                <div className="plot-section">
-                  <h3>Plot</h3>
-                  <p>{movieDetails.Plot?.split('. ')[0]}.</p>
-                </div>
+                {!user ? (
+                  <div className="login-prompt">
+                    <p><strong>Login to get more details on this movie.</strong></p>
+                    <button
+                      className="login-btn"
+                      onClick={() => switchForm('login')}
+                    >
+                      Login
+                    </button>
+                  </div>
+                ) : (
 
-                <div className="ratings-section">
-                  <h3>Ratings</h3>
-                  {movieDetails.Ratings?.map((rating, index) => (
-                    <div key={index} className="rating-item">
-                      <strong>{rating.Source}:</strong> {rating.Value}
+                  <>
+                    <div className="plot-section">
+                      <h3>Plot</h3>
+                      <p>{movieDetails.Plot?.split('. ')[0]}.</p>
                     </div>
-                  ))}
-                  {movieDetails.imdbRating && (
-                    <div className="rating-item">
-                      <strong>IMDB Rating:</strong> {movieDetails.imdbRating}/10
-                      <div className="stars-display">{renderStars(movieDetails.imdbRating)}</div>
+
+                    <div className="ratings-section">
+                      <h3>Ratings</h3>
+                      {movieDetails.Ratings?.map((rating, index) => (
+                        <div key={index} className="rating-item">
+                          <strong>{rating.Source}:</strong> {rating.Value}
+                        </div>
+                      ))}
+                      {movieDetails.imdbRating && (
+                        <div className="rating-item">
+                          <strong>IMDB Rating:</strong> {movieDetails.imdbRating}/10
+                          <div className="stars-display">{renderStars(movieDetails.imdbRating)}</div>
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
+                    {user && userRating > 0 && (
+                      <div className="rating-item user-rating-display">
+                        <strong>Your Rating:</strong> {userRating}/10
+                        <div className="stars-display">{renderStars(userRating)}</div>
+                        {userReview && <p className="user-review">"{userReview}"</p>}
+                      </div>
+                    )}
+
+                  </>
+                )}
               </>
             )}
 
-            {user && (
-              <>
-                <div className="user-rating-section">
-                  <h3>Rate This Movie</h3>
-                  <div className="user-rating-stars">{renderStars(userRating, true)}</div>
-                  <p>Your Rating: {userRating}/10</p>
+            {user && !hasRated && (
+              <div className="user-rating-section">
+                <h3>Rate This Movie</h3>
+                <div className="user-rating-stars">{renderStars(userRating, true)}</div>
+                <p>Your Rating: {userRating}/10</p>
 
-                  <textarea
-                    placeholder="Write a review (optional)"
-                    value={userReview}
-                    onChange={(e) => setUserReview(e.target.value)}
-                    className="review-textarea"
-                  />
+                <textarea
+                  placeholder="Write a review (optional)"
+                  value={userReview}
+                  onChange={(e) => setUserReview(e.target.value)}
+                  className="review-textarea"
+                />
 
-                  <button onClick={handleRatingSubmit} className="submit-rating-btn">Submit Rating</button>
-                </div>
+                <button onClick={handleRatingSubmit} className="submit-rating-btn">
+                  Submit Rating
+                </button>
 
-                <div className="watchlist-btn">
-                  <button onClick={toggleWatchlist}>
-                    <AddToWatchlist isInWatchlist={isInWatchlist} />
-                  </button>
-                </div>
-              </>
+                {ratingMessage && <p className="rating-feedback">{ratingMessage}</p>}
+              </div>
             )}
+
+            {user && hasRated && (
+              <div className="rating-feedback success-message">
+                <p>{ratingMessage}</p>
+              </div>
+            )}
+
           </div>
         </div>
       </div>

@@ -1,13 +1,183 @@
+/* ===============================
+   BASE STYLES
+   =============================== */
+
 body {
-  background:#0000a3;
+  background: #0000a3;
   color: white;
 }
+
+/* ===============================
+   LAYOUT & NAVIGATION
+   =============================== */
+
+/* Menu Container */
+.menu-container {
+  position: relative;
+}
+
+.menu-toggle {
+  display: none;
+  font-size: 2rem;
+  color: white;
+  background: #222;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.menu-bar {
+  display: flex;
+  justify-content: center;
+  background-color: #222;
+  gap: 10px;
+  padding: 10px;
+  flex-wrap: wrap;
+}
+
+.menu-bar button {
+  background: none;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  flex: 0 0 auto; /* prevents stretching */
+}
+
+.menu-bar button.active {
+  border-color: #ffcc00;
+}
+
+/* Top Navigation Buttons */
+.top-right-button {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  z-index: 1000;
+  font-size: 0.9rem;
+}
+
+.signup-btn {
+  right: 200px !important;
+  position: fixed;
+}
+
+.top-user-info {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  background: #1010aa;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 6px;
+  z-index: 1000;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-user-info p {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.top-user-info button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* Menu Authentication */
+.menu-auth-btn {
+  background-color: transparent;
+  border: 1px solid white;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.menu-auth-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.menu-user {
+  color: white;
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.logout-btn {
+  margin-left: 10px;
+  padding: 3px 10px;
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ===============================
+   HOME PAGE HERO SECTION
+   =============================== */
+
+.home-hero {
+  position: relative;
+  height: 100vh;
+  background-image: url('https://images.unsplash.com/photo-1524985069026-dd778a71c7b4');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay {
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  padding: 40px;
+  border-radius: 20px;
+}
+
+.hero-title {
+  color: #fff;
+  font-size: 3rem;
+  margin-bottom: 30px;
+  font-weight: bold;
+}
+
+.hero-search {
+  width: 90%;
+  max-width: 600px;
+  padding: 15px 30px;
+  border-radius: 999px;
+  border: none;
+  font-size: 1.2rem;
+  outline: none;
+}
+
+/* ===============================
+   MOVIE GRID & CARDS
+   =============================== */
 
 .movie-app > .row {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem; /* adds spacing between cards */
-  justify-content: center; /* centers items if desired */
+  gap: 1rem;
+  justify-content: center;
 }
 
 .movie-card {
@@ -41,48 +211,165 @@ body {
   font-weight: bold;
 }
 
+.login-prompt {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.login-btn {
+  margin-top: 10px;
+  padding: 8px 15px;
+  background-color: #007bff;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+}
+
+.login-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.login-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 8px;
+  max-width: 400px;
+  text-align: center;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.login-confirm-btn, .close-btn {
+  margin: 10px;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.login-confirm-btn {
+  background-color: #007bff;
+  color: white;
+}
+
+.close-btn {
+  background-color: #ccc;
+}
+
+/* MovieDetails modal */
+.modal-overlay {
+  z-index: 1000;
+}
+
+/* Login modal */
+.login-modal-overlay {
+  z-index: 2000; /* Must be higher */
+}
+
+.login-modal-overlay,
+.login-modal {
+  pointer-events: auto;
+}
+
+.login-modal-overlay {
+  background: rgba(237, 221, 221, 0.5); /* red transparent */
+}
+
+
+
+.favorite-button,
+.watchlist-button {
+  position: absolute;
+  top: 10px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  z-index: 10; /* Ensure it's above overlay */
+  cursor: pointer;
+}
+
+.favorite-button {
+  right: 40px;
+}
+
+.watchlist-button {
+  right: 10px;
+}
+
+
 .movie-card:hover .movie-card-overlay {
   opacity: 1;
 }
 
-.top-right-button {
-  position: fixed;
+/* Movie Card Action Buttons */
+.favorite-button,
+.watchlist-button {
+  position: absolute;
   top: 10px;
-  right: 20px;
-  padding: 6px 12px;
-  background-color: #007bff;
-  color: white;
+  background: transparent;
   border: none;
-  border-radius: 2px;
+  font-size: 1.5rem;
   cursor: pointer;
-  z-index: 1000;
-  font-size: 0.9rem;
 }
 
-.signup-btn {
-  right: 200px !important;
+.favorite-button {
+  right: 40px;
 }
 
+.watchlist-button {
+  right: 10px;
+}
+
+.bi-heart-fill {
+  color: red;
+  transition: transform 0.2s;
+}
+
+.bi-heart-fill:hover {
+  transform: scale(1.2);
+}
+
+/* ===============================
+   MODAL COMPONENTS
+   =============================== */
+
+/* Base Modal Overlay */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5); /* semi-transparent backdrop */
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
-  overflow-y: auto;
 }
 
+.signup-modal-overlay {
+  z-index: 2000; /* Same as login, or higher */
+  background: rgba(0, 0, 0, 0.6); /* or whatever overlay style you prefer */
+}
+
+
+/* Authentication Modal */
 .auth-form {
-  background:#0606ff;
+  background: #0606ff;
   padding: 30px;
   border-radius: 12px;
   width: 350px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  z-index: 2100;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .auth-form input {
@@ -102,43 +389,43 @@ body {
   border-radius: 6px;
 }
 
+.auth-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
 .form-link {
   color: #007bff;
   cursor: pointer;
   text-decoration: underline;
 }
 
-.top-user-info {
-  position: fixed;
-  top: 10px;
-  right: 20px;
-  background: #1010aa;
-  color: white;
-  padding: 8px 15px;
-  border-radius: 6px;
-  z-index: 1000;
-  font-size: 0.85rem;
+/* Password Input with Eye Icon */
+.password-input-group {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 10px;
 }
 
-.top-user-info p {
-  margin: 0;
-  white-space: nowrap;
+.password-input-group input {
+  flex: 1;
+  padding-right: 30px;
 }
 
-.top-user-info button {
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
+.eye-icon {
+  position: absolute;
+  right: 10px;
   cursor: pointer;
-  font-size: 0.8rem;
+  user-select: none;
+  font-size: 1.2rem;
 }
 
-/* Movie Details Modal Styles */
+/* ===============================
+   MOVIE DETAILS MODAL
+   =============================== */
+
 .movie-details-modal {
   background: #1010aa;
   border-radius: 12px;
@@ -206,9 +493,59 @@ body {
   line-height: 1.5;
 }
 
+.plot-section {
+  margin: 20px 0;
+}
+
+.plot-section p {
+  line-height: 1.6;
+  text-align: justify;
+}
+
+.toggle-details-btn {
+  margin: 1rem 0;
+  padding: 8px 16px;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+/* ===============================
+   RATINGS & REVIEWS
+   =============================== */
+
+   .rating-feedback {
+  margin-top: 10px;
+  font-weight: 500;
+  color: #444;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px 12px;
+  border-radius: 4px;
+  margin-top: 16px;
+}
+
 .ratings-section {
   margin: 20px 0;
 }
+
+.rating-item.user-rating-display {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed #ccc;
+}
+
+.user-review {
+  font-style: italic;
+  color: #555;
+  margin-top: 6px;
+}
+
 
 .rating-item {
   margin: 10px 0;
@@ -219,15 +556,6 @@ body {
 
 .stars-display {
   margin-top: 5px;
-}
-
-.plot-section {
-  margin: 20px 0;
-}
-
-.plot-section p {
-  line-height: 1.6;
-  text-align: justify;
 }
 
 .user-rating-section {
@@ -283,176 +611,9 @@ body {
   background-color: #218838;
 }
 
-.loading, .error {
-  text-align: center;
-  padding: 40px;
-  font-size: 18px;
-}
-
-.error {
-  color: #ff6b6b;
-}
-
-/* Responsive Design */
-@media (max-width: 768px) {
-  .movie-details-content {
-    flex-direction: column;
-  }
-  
-  .movie-poster-section,
-  .movie-info-section {
-    min-width: auto;
-  }
-  
-  .movie-details-modal {
-    width: 95%;
-    margin: 10px;
-  }
-
-  .top-user-info {
-    position: relative;
-    top: auto;
-    right: auto;
-    margin: 10px;
-    justify-content: center;
-  }
-}
-
-.menu-container {
-  position: relative;
-}
-
-.menu-toggle {
-  display: none;
-  font-size: 2rem;
-  color: white;
-  background: #222;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-
-.menu-bar {
-  display: flex;
-  justify-content: center;
-  background-color: #222;
-  gap: 10px;
-  padding: 10px;
-  flex-wrap: wrap;
-}
-
-.menu-bar button {
-  background: none;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  font-size: 1rem;
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-}
-
-.menu-bar button.active {
-  border-color: #ffcc00;
-}
-
-/* Mobile styles */
-@media (max-width: 768px) {
-  .menu-toggle {
-    display: block;
-  }
-
-  .menu-bar {
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .menu-bar.open {
-    display: flex;
-  }
-
-  .menu-bar button {
-    width: 100%;
-    text-align: left;
-    padding: 12px 20px;
-    border-bottom: 1px solid #444;
-  }
-}
-
-.home-hero {
-  position: relative;
-  height: 100vh;
-  background-image: url('https://images.unsplash.com/photo-1524985069026-dd778a71c7b4'); /* Replace with any cinematic image */
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.overlay {
-  text-align: center;
-  background-color: rgba(0, 0, 0, 0.6); /* darken overlay */
-  padding: 40px;
-  border-radius: 20px;
-}
-
-.hero-title {
-  color: #fff;
-  font-size: 3rem;
-  margin-bottom: 30px;
-  font-weight: bold;
-}
-
-.hero-search {
-  width: 90%;
-  max-width: 600px;
-  padding: 15px 30px;
-  border-radius: 999px;
-  border: none;
-  font-size: 1.2rem;
-  outline: none;
-}
-
-.bi-heart-fill {
-  color: red;
-  transition: transform 0.2s;
-}
-
-.bi-heart-fill:hover {
-  transform: scale(1.2);
-}
-
-.favorite-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: transparent;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.watchlist-button {
-  position: absolute;
-  top: 10px;
-  right: 50px;
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.logout-btn {
-  margin-left: 10px;
-  padding: 3px 10px;
-  background-color: #dc3545;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
+/* ===============================
+   WATCHLIST SECTION
+   =============================== */
 
 .watchlist-section {
   padding: 20px;
@@ -471,6 +632,39 @@ body {
   font-size: 1.2rem;
   margin-top: 50px;
 }
+
+/* ===============================
+   TOAST NOTIFICATIONS
+   =============================== */
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ===============================
+   UTILITY CLASSES
+   =============================== */
+
+.loading,
+.error {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+}
+
+.error {
+  color: #ff6b6b;
+}
+
+/* ===============================
+   ANIMATIONS
+   =============================== */
 
 @keyframes slideInRight {
   from {
@@ -503,33 +697,55 @@ body {
   }
 }
 
-/* Toast container to handle multiple toasts */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
 
-/* Modal overlay styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 10000;
-}
-
-/* Responsive adjustments */
+/* Tablet and Mobile Styles */
 @media (max-width: 768px) {
+  /* Menu Responsiveness */
+  .menu-toggle {
+    display: block;
+  }
+
+  .menu-bar {
+    display: flex;
+    justify-content: center;
+    background-color: #222;
+    gap: 10px;
+    padding: 10px;
+    flex-wrap: wrap;
+  }
+
+  .menu-bar.open {
+    display: flex;
+  }
+
+  /* Modal Responsiveness */
+  .movie-details-content {
+    flex-direction: column;
+  }
+  
+  .movie-poster-section,
+  .movie-info-section {
+    min-width: auto;
+  }
+  
+  .movie-details-modal {
+    width: 95%;
+    margin: 10px;
+  }
+
+  /* Top User Info Responsiveness */
+  .top-user-info {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin: 10px;
+    justify-content: center;
+  }
+
+  /* Toast Responsiveness */
   .toast-container {
     top: 10px;
     right: 10px;
@@ -542,50 +758,239 @@ body {
   }
 }
 
-.toggle-details-btn {
-  margin: 1rem 0;
-  padding: 8px 16px;
-  background-color: #444;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-}
+/* ===============================
+   SEARCH BAR STYLES
+   =============================== */
 
-.favorite-button,
-.watchlist-button {
-  position: absolute;
-  top: 10px;
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-.favorite-button {
-  right: 40px;
-}
-
-.watchlist-button {
-  right: 10px;
-}
-
-.password-input-group {
+.search-container {
   position: relative;
+  width: 100%;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Centered search state (no results) */
+.search-container.centered {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
+  max-width: 800px;
+  z-index: 100;
+}
+
+/* Top-right search state (with results) */
+.search-container.top-right {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  width: 350px;
+  z-index: 1000;
+  transform: none;
+}
+
+/* Search input styling */
+.search-input {
+  width: 100%;
+  padding: 18px 25px;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  outline: none;
+  transition: all 0.3s ease;
+  color: #333;
+}
+
+.search-input::placeholder {
+  color: #666;
+  font-style: italic;
+}
+
+.search-input:focus {
+  transform: scale(1.02);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 1);
+}
+
+/* Search icon styling */
+.search-icon {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  font-size: 1.2rem;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.search-input:focus + .search-icon {
+  color: #007bff;
+}
+
+/* Movie results container */
+.movie-results-container {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.5s ease;
+  margin-top: 100px; /* Space for top-right search bar */
+}
+
+.movie-results-container.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Search overlay background */
+.search-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #0000a3 0%, #1010aa 100%);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.4s ease;
+  z-index: 50;
+}
+
+.search-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Clear search button */
+.clear-search-btn {
+  position: absolute;
+  right: 60px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.3s ease;
+  padding: 5px;
+  border-radius: 50%;
+}
+
+.clear-search-btn.visible {
+  opacity: 1;
+}
+
+.clear-search-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Movie grid adjustments */
+.movie-grid-container {
+  padding-top: 20px;
+  min-height: calc(100vh - 120px);
+}
+
+/* Search suggestions (optional enhancement) */
+.search-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-radius: 0 0 20px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.3s ease;
+  z-index: 101;
+}
+
+.search-suggestions.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.suggestion-item {
+  padding: 12px 25px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  transition: background 0.2s ease;
+}
+
+.suggestion-item:hover {
+  background: #f8f9fa;
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+/* ===============================
+   RESPONSIVE DESIGN
+   =============================== */
+
+@media (max-width: 768px) {
+  .search-container.centered {
+    width: 95%;
+    top: 40%;
+  }
+  
+  .search-container.top-right {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    width: auto;
+  }
+  
+  .search-input {
+    padding: 15px 20px;
+    font-size: 1rem;
+  }
+  
+  .movie-results-container {
+    margin-top: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  .search-container.centered {
+    top: 35%;
+  }
+  
+  .search-input {
+    padding: 12px 18px;
+    font-size: 0.95rem;
+  }
+  
+  .movie-results-container {
+    margin-top: 70px;
+  }
+}
+
+.movie-search-center {
+  height: 70vh;
   display: flex;
   align-items: center;
+  justify-content: center;
+  background: #000;
 }
 
-.password-input-group input {
-  flex: 1;
-  padding-right: 30px;
+.search-center-input {
+  width: 60%;
+  max-width: 600px;
+  padding: 15px 20px;
+  font-size: 1.5rem;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  box-shadow: 0 0 10px rgba(255,255,255,0.2);
 }
-
-.eye-icon {
-  position: absolute;
-  right: 10px;
-  cursor: pointer;
-  user-select: none;
-  font-size: 1.2rem;
-}
-

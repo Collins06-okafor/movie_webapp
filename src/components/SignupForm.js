@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { auth } from '../firebase/config'; // Fixed: Import auth from config file
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 
-const SignupForm = ({ switchForm }) => {
+const SignupForm = ({ switchForm, onSignupSuccess }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,11 +41,12 @@ const SignupForm = ({ switchForm }) => {
 
   try {
     await createUserWithEmailAndPassword(auth, email, password);
-    alert("Signup successful!");
-    switchForm('login');
+    onSignupSuccess(); // ✅ Calls toast from App
+    switchForm('login'); // open login form
   } catch (err) {
     setError(err.message);
   }
+
 };
 
 <small style={{ color: "#666" }}>

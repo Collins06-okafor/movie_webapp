@@ -14,11 +14,16 @@ import AddToWatchlist from './components/AddToWatchlist';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
+import AgeVerification from './components/AgeVerification';
+
+
 
 const App = () => {
+  const [isAgeVerified, setIsAgeVerified] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [selectedTab, setSelectedTab] = useState('home');
   const [activeForm, setActiveForm] = useState(null);
+  const [toastMessage, setToastMessage] = useState(null);
   const [user, setUser] = useState(null);
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [movies, setMovies] = useState([]);
@@ -27,11 +32,41 @@ const App = () => {
   const [watchlist, setWatchlist] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
+  
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
   const openForm = (formType) => setActiveForm(formType);
   const handleMovieClick = (movie) => setSelectedMovie(movie);
   const handleCloseMovieDetails = () => setSelectedMovie(null);
+  const hasSearchResults = movies && movies.length > 0;
+  const defaultKeywords = ['batman', 'spider', 'star', 'love', 'war', 'future', 'dream', 'ghost', 'alien', 'dragon'];
+
+  const fetchRandomMovies = async () => {
+  const randomKeyword = defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
+  const url = `http://www.omdbapi.com/?s=${randomKeyword}&apikey=9733aa05`;
+  const response = await fetch(url);
+  const data = await response.json();
+  if (data.Search) {
+    setMovies(data.Search);
+  }
+};
+
+
+useEffect(() => {
+  if (selectedTab === 'movies' && !searchValue) {
+    fetchRandomMovies();
+  }
+
+  if (selectedTab === 'movies') {
+    setTimeout(() => {
+      const el = document.getElementById('movie-results');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
+  }
+}, [selectedTab]);
+
+
+
   
 
   // Toast management
@@ -76,14 +111,17 @@ const App = () => {
     return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (selectedTab === 'movies') {
-      setTimeout(() => {
-        const el = document.getElementById('movie-results');
-        if (el) el.scrollIntoView({ behavior: 'smooth' });
-      }, 300);
-    }
-  }, [selectedTab]);
+ useEffect(() => {
+  if (selectedTab === 'movies') {
+    setTimeout(() => {
+      const input = document.querySelector('.search-center-input, .search-box input');
+      if (input) input.focus(); // ✅ Auto-focuses input field
+
+      const el = document.getElementById('movie-results');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
+  }
+}, [selectedTab]);
 
   useEffect(() => {
   const fetchMovies = async () => {
@@ -99,6 +137,16 @@ const App = () => {
     fetchMovies();
   }
 }, [searchValue]);
+
+const getMovieRequest = async () => {
+  const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`;
+  const response = await fetch(url);
+  const responseJson = await response.json();
+  if (responseJson.Search) {
+    setMovies(responseJson.Search);
+  }
+  
+};
 
 
   const toggleFavorite = (movie) => {
@@ -143,6 +191,11 @@ const App = () => {
     localStorage.setItem(`watchlist_${user.uid}`, JSON.stringify(newWatchlist));
   };
 
+  //Age verification
+  if (!isAgeVerified) {
+    return <AgeVerification onVerify={setIsAgeVerified} />;
+  }
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -170,6 +223,11 @@ const App = () => {
       `Thanks for rating "${movieTitle}" ${rating} stars!${review ? '\n\nYour review: ' + review : ''}`,
       'success'
     );
+    const openLoginForm = () => {
+    setSelectedMovie(null);      // ✅ closes movie modal
+    setActiveForm('login');      // ✅ opens login modal
+    };
+
   };
 
   return (
@@ -216,56 +274,64 @@ const App = () => {
       </Modal>
 
       {/* Auth Buttons */}
-      {!user ? (
-        <div className="auth-buttons">
-          <button className="top-right-button" onClick={() => openForm('login')}>Login</button>
-          <button className="top-right-button signup-btn" onClick={() => openForm('signup')}>Sign Up</button>
-        </div>
-      ) : (
-        <div className="top-user-info">
-          <p>Welcome, {user.email.split('@')[0]}</p>
-          <button className="logout-btn" onClick={handleLogout}>Logout</button>
-        </div>
-      )}
-
-      {/* Menu Bar */}
       <div className="menu-container">
-        <div className="menu-toggle" onClick={toggleMenu}>☰</div>
-        <div className={`menu-bar ${menuOpen ? 'open' : ''}`}>
-          <button onClick={() => setSelectedTab('home')} className={selectedTab === 'home' ? 'active' : ''}>Home</button>
-          <button onClick={() => setSelectedTab('movies')} className={selectedTab === 'movies' ? 'active' : ''}>Movies</button>
-          <button onClick={() => setSelectedTab('favorites')} className={selectedTab === 'favorites' ? 'active' : ''}>Favorites</button>
-          <button onClick={() => setSelectedTab('watchlist')} className={selectedTab === 'watchlist' ? 'active' : ''}>Watchlist</button>
-        </div>
-      </div>
+  <div className="menu-toggle" onClick={toggleMenu}>☰</div>
+  <div className={`menu-bar ${menuOpen ? 'open' : ''}`}>
+    <button onClick={() => setSelectedTab('home')} className={selectedTab === 'home' ? 'active' : ''}>Home</button>
+    <button onClick={() => setSelectedTab('movies')} className={selectedTab === 'movies' ? 'active' : ''}>Movies</button>
+    <button onClick={() => setSelectedTab('favorites')} className={selectedTab === 'favorites' ? 'active' : ''}>Favorites</button>
+    <button onClick={() => setSelectedTab('watchlist')} className={selectedTab === 'watchlist' ? 'active' : ''}>Watchlist</button>
+
+    {/* Auth buttons now inside menu */}
+    <div className="auth-controls">
+      {!user ? (
+        <>
+          <button className="menu-auth-btn" onClick={() => openForm('login')}>Login</button>
+          <button className="menu-auth-btn" onClick={() => openForm('signup')}>Sign Up</button>
+        </>
+      ) : (
+        <>
+          <span className="menu-user">Hi, {user.email.split('@')[0]}</span>
+          <button className="menu-auth-btn" onClick={handleLogout}>Logout</button>
+        </>
+      )}
+    </div>
+  </div>
+</div>
+
+
 
       {/* Modals */}
+      {/* Login Modal */}
       {activeForm === 'login' && (
-        <div className="modal-overlay">
+        <div className="modal-overlay login-modal-overlay">
           <LoginForm 
             switchForm={setActiveForm} 
             onLoginSuccess={handleLoginSuccess}
-            showToast={showToast}
           />
         </div>
       )}
+
+      {/* Signup Modal */}
       {activeForm === 'signup' && (
-        <div className="modal-overlay">
+        <div className="modal-overlay signup-modal-overlay">
           <SignupForm 
             switchForm={setActiveForm} 
             onSignupSuccess={handleSignupSuccess}
-            showToast={showToast}
           />
         </div>
       )}
+
       {selectedMovie && (
-        <MovieDetails 
-          movie={selectedMovie} 
-          onClose={handleCloseMovieDetails} 
-          user={user} 
-          onRatingSubmit={handleRatingSubmit}
+        <MovieDetails
+          movie={selectedMovie}
+          onClose={handleCloseMovieDetails}
+          user={user}
+          switchForm={openForm} // ✅ correct
         />
       )}
+
+
 
       {/* Home Page */}
       {selectedTab === 'home' && (
@@ -290,25 +356,44 @@ const App = () => {
 
       {/* Movies Page */}
       {selectedTab === 'movies' && (
-        <div id="movie-results" className="container-fluid movie-app">
-          <div className="row">
-            <MovieListHeading heading="Search Results" />
-            <SearchBox searchValue={searchValue} setSearchValue={setSearchValue} />
-          </div>
-          <div className="row">
-            <MovieList
-              movies={movies}
-              favouriteComponent={AddFavourite}
-              handleFavouritesClick={toggleFavorite}
-              watchlistComponent={AddToWatchlist}
-              handleWatchlistClick={toggleWatchlist}
-              onMovieClick={handleMovieClick}
-              favorites={favorites}
-              watchlist={watchlist}
-            />
-          </div>
-        </div>
-      )}
+          <>
+            {!hasSearchResults ? (
+              <div className="movie-search-center">
+                <input
+                  type="text"
+                  className="search-center-input"
+                  placeholder="Search for movies..."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      getMovieRequest(); // or setSelectedTab('movies');
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="container-fluid movie-app">
+                <div className="row justify-content-between align-items-center mb-3 px-3">
+                  <MovieListHeading heading="Search Results" />
+                  <SearchBox searchValue={searchValue} setSearchValue={setSearchValue} />
+                </div>
+                <div className="row">
+                  <MovieList
+                    movies={movies}
+                    favouriteComponent={AddFavourite}
+                    handleFavouritesClick={toggleFavorite}
+                    watchlistComponent={AddToWatchlist}
+                    handleWatchlistClick={toggleWatchlist}
+                    onMovieClick={handleMovieClick}
+                    favorites={favorites}
+                    watchlist={watchlist}
+                  />
+                </div>
+              </div>
+            )}
+          </>
+        )}
 
       {/* Favorites Page */}
       {selectedTab === 'favorites' && (

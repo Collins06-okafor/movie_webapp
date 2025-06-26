@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { auth } from '../firebase/config'; // Fixed: Import auth from config file
 import { signInWithEmailAndPassword } from 'firebase/auth'; // Fixed: Import from firebase/auth
 
-const LoginForm = ({ switchForm }) => {
+const LoginForm = ({ switchForm, onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -34,12 +34,12 @@ const LoginForm = ({ switchForm }) => {
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    alert("Login successful!");
-    switchForm(null); // closes the modal
+    onLoginSuccess(); // ✅ Calls toast from App
+    switchForm(null); // close modal
   } catch (err) {
     setError("Invalid email or password");
-    console.error("Login error:", err.message);
   }
+
 };
 
 <small style={{ color: "#666" }}>
