@@ -15,7 +15,14 @@ import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 import { onAuthStateChanged } from 'firebase/auth';
 import AgeVerification from './components/AgeVerification';
-import Profile from './components/Profile'; // adjust path as needed
+import Profile from './components/Profile';
+import AccountSettings from './components/AccountSettings';
+import './i18n'; 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
+
+
+
 
 
 //import backgroundImage from '../images/background.png';
@@ -35,6 +42,9 @@ const App = () => {
   const [toasts, setToasts] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
   const [userMenuOpen, setUserMenuOpen] = useState(false); // 👈 for avatar dropdown
+  const [showProfile, setShowProfile] = useState(false);
+  const [showAccountSettings, setShowAccountSettings] = useState(false);
+
 
   // Create ref for the dropdown container
   const dropdownRef = useRef(null);
@@ -319,35 +329,36 @@ const App = () => {
                 </div>
 
                 {menuOpen && (
-                  <div className="user-dropdown-menu">
-                    <div className="user-email">{user.email}</div>
-                    <hr />
-                    <button onClick={() => {
-                      setMenuOpen(false);
-                      showModal("Profile", "This is your profile section.");
-                    }}>
-                      👤 Profile
-                    </button>
-                    <button onClick={() => {
-                      setMenuOpen(false);
-                      showModal("Account Settings", "Manage your preferences here.");
-                    }}>
-                      ⚙️ Account Settings
-                    </button>
-                    <button onClick={() => {
-                      setMenuOpen(false);
-                      setActiveForm('login');
-                    }}>
-                      🔁 Switch User
-                    </button>
-                    <button onClick={() => {
-                      setMenuOpen(false);
-                      handleLogout();
-                    }}>
-                      🚪 Log Out
-                    </button>
-                  </div>
-                )}
+                <div className="user-dropdown-menu">
+                  <div className="user-email">{user.email}</div>
+                  <hr />
+                  <button onClick={() => {
+                    setMenuOpen(false);
+                    setShowProfile(true);
+                  }}>
+                    👤 Profile
+                  </button>
+                  <button onClick={() => {
+                    setMenuOpen(false);
+                    setShowAccountSettings(true);
+                  }}>
+                    ⚙️ Account Settings
+                  </button>
+                  <button onClick={() => {
+                    setMenuOpen(false);
+                    setActiveForm('login');
+                  }}>
+                    🔁 Switch User
+                  </button>
+                  <button onClick={() => {
+                    setMenuOpen(false);
+                    handleLogout();
+                  }}>
+                    🚪 Log Out
+                  </button>
+                </div>
+              )}
+
               </div>
             ) : (
               <div className="auth-controls">
@@ -378,6 +389,25 @@ const App = () => {
             onSignupSuccess={handleSignupSuccess}
           />
         </div>
+      )}
+
+      {/* Profile Modal */}
+      {showProfile && (
+        <Profile
+          user={user}
+          favorites={favorites}
+          watchlist={watchlist}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
+
+      {/* Account Settings Modal */}
+      {showAccountSettings && (
+        <AccountSettings
+          user={user}
+          onClose={() => setShowAccountSettings(false)}
+          showToast={showToast}
+        />
       )}
 
       {selectedMovie && (

@@ -1,6 +1,10 @@
 import React, { useState, useRef } from 'react';
 import './AgeVerification.css';
 import ReCAPTCHA from 'react-google-recaptcha';
+import bgImage from '../images/blank-clapperboard-popcorn.jpg';
+
+
+
 
 const AgeVerification = ({ onVerify }) => {
   const [age, setAge] = useState('');

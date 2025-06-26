@@ -4,15 +4,23 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.8); /* unified overlay */
+
+  /* Background image with dark overlay using linear-gradient */
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)),
+              url('../images/blank-clapperboard-popcorn.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000;
 }
 
+
 .age-verification-modal {
-  background-color: #ffffff;
+  background-color: rgba(250, 246, 246, 0.9);
   padding: 40px 30px;
   border-radius: 10px;
   text-align: center;
@@ -64,28 +72,4 @@
   color: red;
   margin-top: 10px;
   font-weight: bold;
-}
-
-/* Center the recaptcha box and add spacing */
-.age-verification-modal .grecaptcha-badge,
-.age-verification-modal .g-recaptcha {
-  margin: 10px auto 20px;
-  display: block;
-}
-
-/* Optional: Override reCAPTCHA checkbox size (if needed) */
-.age-verification-modal iframe[src*="recaptcha"] {
-  width: 304px !important; /* default widget width */
-  height: 78px !important; /* default widget height */
-  border-radius: 6px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Style the error message below the captcha */
-.age-verification-error {
-  color: #ff4d4f; /* bright red for errors */
-  margin-top: 10px;
-  font-weight: bold;
-  font-size: 14px;
-  text-align: center;
 }

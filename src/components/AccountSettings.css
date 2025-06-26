@@ -1,0 +1,134 @@
+/*
+
+.settings-modal {
+  background: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 900px;
+  width: 100%;
+  position: relative;
+  display: flex;
+  gap: 30px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.settings-container {
+  display: flex;
+  width: 100%;
+}
+
+.settings-sidebar {
+  width: 200px;
+  border-right: 1px solid #ccc;
+}
+
+.settings-sidebar h2 {
+  margin-bottom: 20px;
+  font-size: 18px;
+}
+
+.settings-tab {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.settings-tab.active {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.tab-icon {
+  margin-right: 8px;
+}
+
+.settings-content {
+  flex: 1;
+  padding-left: 20px;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.setting-item {
+  margin-bottom: 15px;
+}
+
+.setting-item label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.setting-item select,
+.setting-item input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.update-password-btn,
+.delete-account-btn,
+.confirm-delete-btn,
+.cancel-delete-btn {
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+}
+
+.delete-account-btn {
+  background-color: #dc3545;
+  margin-top: 10px;
+}
+
+.confirm-delete-btn {
+  background-color: #dc3545;
+}
+
+.cancel-delete-btn {
+  background-color: #6c757d;
+  margin-left: 10px;
+}
+
+.account-info p {
+  margin: 6px 0;
+}
+
+.danger-zone {
+  margin-top: 30px;
+  background: #fff3f3;
+  padding: 20px;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+}
+
+.delete-confirm input {
+  margin-top: 10px;
+  width: 100%;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.delete-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
