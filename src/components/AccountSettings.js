@@ -6,6 +6,14 @@ import { useTranslation } from 'react-i18next';
 const AccountSettings = ({ user, onClose, showToast }) => {
   const { t, i18n } = useTranslation();
   const [activeSection, setActiveSection] = useState('preferences');
+
+  const ratingLevels = {
+    'G': 0,
+    'PG': 1,
+    'PG-13': 2,
+    'R': 3,
+  };
+
   
   const [settings, setSettings] = useState({
     notifications: {
@@ -185,12 +193,18 @@ const AccountSettings = ({ user, onClose, showToast }) => {
                   <label>{t('content_rating_limit') || 'Content Rating Limit'}</label>
                   <select 
                     value={settings.preferences.contentRating}
-                    onChange={(e) => handleSettingChange('preferences', 'contentRating', e.target.value)}
+                    onChange={(e) => setSettings((prev) => ({
+                      ...prev,
+                      preferences: {
+                        ...prev.preferences,
+                        contentRating: e.target.value,
+                      },
+                    }))}
                   >
-                    <option value="G">G - {t('general_audiences') || 'General Audiences'}</option>
-                    <option value="PG">PG - {t('parental_guidance') || 'Parental Guidance'}</option>
-                    <option value="PG-13">PG-13 - {t('parents_cautioned') || 'Parents Strongly Cautioned'}</option>
-                    <option value="R">R - {t('restricted') || 'Restricted'}</option>
+                    <option value="G">G - General Audiences</option>
+                    <option value="PG">PG - Parental Guidance</option>
+                    <option value="PG-13">PG-13 - Parents Strongly Cautioned</option>
+                    <option value="R">R - Restricted</option>
                   </select>
                 </div>
 

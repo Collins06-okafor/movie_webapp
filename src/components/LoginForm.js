@@ -7,6 +7,8 @@ const LoginForm = ({ switchForm, onLoginSuccess }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const formRef = useRef(null);
+  const [success, setSuccess] = useState('');
+
 
   // Close modal on outside click
   useEffect(() => {
@@ -43,18 +45,20 @@ const LoginForm = ({ switchForm, onLoginSuccess }) => {
   const handlePasswordReset = async () => {
     if (!email) {
       setError("Please enter your email to reset password.");
+      setSuccess('');
       return;
     }
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setError(""); // clear error
-      alert("Password reset email sent! Check your inbox.");
+      setError('');
+      setSuccess("✅ Password reset email sent! Check your inbox.");
     } catch (err) {
-      setError("Failed to send reset email. Make sure your email is correct.");
-      console.error(err);
+      setSuccess('');
+      setError("❌ Failed to send reset email. Make sure your email is correct.");
     }
   };
+
 
   return (
     <div className="auth-overlay">
@@ -90,6 +94,10 @@ const LoginForm = ({ switchForm, onLoginSuccess }) => {
             Forgot Password?
           </p>
         </form>
+
+        {success && <p style={{ color: "green" }}>{success}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
+
 
         {error && <p style={{ color: "red", marginTop: "10px" }}>{error}</p>}
 
