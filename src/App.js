@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import MovieList from './components/MovieList';
 import MovieDetails from './components/MovieDetails';
@@ -22,6 +22,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Link, useLocation } from 'react-router-dom';
 import Footer from './components/Footer';
 
+
+
+
+
+
+//import backgroundImage from '../images/background.png';
+
 const App = () => {
   const [isAgeVerified, setIsAgeVerified] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -36,21 +43,15 @@ const App = () => {
   const [watchlist, setWatchlist] = useState([]);
   const [toasts, setToasts] = useState([]);
   const [modal, setModal] = useState({ isOpen: false, title: '', message: '', type: 'info' });
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false); // 👈 for avatar dropdown
   const [showProfile, setShowProfile] = useState(false);
   const [showAccountSettings, setShowAccountSettings] = useState(false);
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
-  const [settings, setSettings] = useState({
-    preferences: {
-      contentRating: 'R',
-    },
-  });
+
 
   // Create ref for the dropdown container
   const dropdownRef = useRef(null);
 
   const toggleMenu = () => setMenuOpen(!menuOpen);
-  
   const openForm = (formType) => {
     setActiveForm((prevForm) => (prevForm === formType ? null : formType));
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -58,7 +59,7 @@ const App = () => {
 
   const getInitials = (email) => {
     const name = email.split('@')[0].replace(/[^a-zA-Z ]/g, '').trim();
-    const parts = name.split(/[._\s]+/);
+    const parts = name.split(/[._\s]+/); // handles john.doe or john doe
     return parts.slice(0, 2).map(p => p[0]?.toUpperCase()).join('');
   };
 
@@ -67,89 +68,28 @@ const App = () => {
   const hasSearchResults = movies && movies.length > 0;
   const defaultKeywords = ['batman', 'spider', 'star', 'love', 'war', 'future', 'dream', 'ghost', 'alien', 'dragon'];
 
-  // Memoized function to prevent unnecessary re-renders
-  const fetchMoviesWithRatings = useCallback(async (keyword) => {
-    if (!keyword.trim()) return;
-    
-    setIsLoading(true);
-    try {
-      const url = `https://www.omdbapi.com/?s=${encodeURIComponent(keyword)}&apikey=9733aa05`;
-      const response = await fetch(url);
-      const data = await response.json();
-
-      if (!data.Search) {
-        setMovies([]);
-        showToast('No movies found for your search', 'info');
-        return;
-      }
-
-      // Limit concurrent requests to prevent API rate limiting
-      const batchSize = 5;
-      const detailedMovies = [];
-      
-      for (let i = 0; i < data.Search.length; i += batchSize) {
-        const batch = data.Search.slice(i, i + batchSize);
-        const batchPromises = batch.map(async (movie) => {
-          try {
-            const res = await fetch(`https://www.omdbapi.com/?i=${movie.imdbID}&apikey=9733aa05`);
-            return res.json();
-          } catch (error) {
-            console.error(`Error fetching details for ${movie.Title}:`, error);
-            return null;
-          }
-        });
-        
-        const batchResults = await Promise.all(batchPromises);
-        detailedMovies.push(...batchResults.filter(movie => movie && movie.Response !== 'False'));
-      }
-
-      const allowedRatings = ['G', 'PG', 'PG-13', 'R'];
-      const ratingLimit = settings?.preferences?.contentRating || 'R';
-      const limitIndex = allowedRatings.indexOf(ratingLimit);
-
-      const filtered = detailedMovies.filter(
-        (movie) => allowedRatings.indexOf(movie.Rated) <= limitIndex
-      );
-
-      setMovies(filtered);
-    } catch (error) {
-      console.error('Error fetching movies:', error);
-      showToast('Error fetching movies. Please try again.', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [settings?.preferences?.contentRating]);
-
-  const fetchRandomMovies = useCallback(async () => {
+  const fetchRandomMovies = async () => {
     const randomKeyword = defaultKeywords[Math.floor(Math.random() * defaultKeywords.length)];
-    await fetchMoviesWithRatings(randomKeyword);
-  }, [fetchMoviesWithRatings]);
-
-  // Debounced search function
-  const debouncedSearch = useCallback(
-    debounce((searchTerm) => {
-      if (searchTerm.trim()) {
-        fetchMoviesWithRatings(searchTerm);
-      }
-    }, 500),
-    [fetchMoviesWithRatings]
-  );
+    const url = `http://www.omdbapi.com/?s=${randomKeyword}&apikey=9733aa05`;
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.Search) {
+      setMovies(data.Search);
+    }
+  };
 
   useEffect(() => {
-    if (selectedTab === 'movies') {
-      // If there's a search value, search for it, otherwise show random movies
-      if (searchValue.trim()) {
-        fetchMoviesWithRatings(searchValue);
-      } else if (!hasSearchResults) {
-        fetchRandomMovies();
-      }
+    if (selectedTab === 'movies' && !searchValue) {
+      fetchRandomMovies();
+    }
 
+    if (selectedTab === 'movies') {
       setTimeout(() => {
         const el = document.getElementById('movie-results');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 300);
     }
-  }, [selectedTab, fetchMoviesWithRatings, fetchRandomMovies, searchValue]);
+  }, [selectedTab]);
 
   // Toast management
   const showToast = (message, type = 'info', duration = 3000) => {
@@ -177,7 +117,6 @@ const App = () => {
         // Load user's favorites and watchlist from localStorage
         const savedFavorites = localStorage.getItem(`favorites_${user.uid}`);
         const savedWatchlist = localStorage.getItem(`watchlist_${user.uid}`);
-        const savedSettings = localStorage.getItem(`settings_${user.uid}`);
         
         if (savedFavorites) {
           setFavorites(JSON.parse(savedFavorites));
@@ -185,18 +124,10 @@ const App = () => {
         if (savedWatchlist) {
           setWatchlist(JSON.parse(savedWatchlist));
         }
-        if (savedSettings) {
-          setSettings(JSON.parse(savedSettings));
-        }
       } else {
         // Clear data when user logs out
         setFavorites([]);
         setWatchlist([]);
-        setSettings({
-          preferences: {
-            contentRating: 'R',
-          },
-        });
       }
     });
     return () => unsubscribe();
@@ -206,7 +137,7 @@ const App = () => {
     if (selectedTab === 'movies') {
       setTimeout(() => {
         const input = document.querySelector('.search-center-input, .search-box input');
-        if (input) input.focus();
+        if (input) input.focus(); // ✅ Auto-focuses input field
 
         const el = document.getElementById('movie-results');
         if (el) el.scrollIntoView({ behavior: 'smooth' });
@@ -214,41 +145,47 @@ const App = () => {
     }
   }, [selectedTab]);
 
-  // Close dropdown when clicking outside
+  // Fixed: Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Check if the click is outside the dropdown container
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setMenuOpen(false);
       }
     };
 
+    // Only add event listener if menu is open
     if (menuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
+    // Cleanup event listener
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [menuOpen]);
+  }, [menuOpen]); // Depend on menuOpen state
 
-  // Handle search input changes with debouncing
-  const handleSearchChange = (value) => {
-    setSearchValue(value);
-    if (selectedTab === 'movies') {
-      debouncedSearch(value);
-    }
-  };
+  useEffect(() => {
+    const fetchMovies = async () => {
+      const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`;
+      const response = await fetch(url);
+      const responseJson = await response.json();
+      if (responseJson.Search) {
+        setMovies(responseJson.Search);
+      }
+    };
 
-  // Handle search from home page - switch to movies tab and trigger search
-  const handleHomeSearch = (searchTerm) => {
-    setSearchValue(searchTerm);
-    setSelectedTab('movies');
-    // The search will be triggered by the useEffect when selectedTab changes
-  };
-
-  const getMovieRequest = () => {
     if (searchValue) {
-      fetchMoviesWithRatings(searchValue);
+      fetchMovies();
+    }
+  }, [searchValue]);
+
+  const getMovieRequest = async () => {
+    const url = `http://www.omdbapi.com/?s=${searchValue}&apikey=9733aa05`;
+    const response = await fetch(url);
+    const responseJson = await response.json();
+    if (responseJson.Search) {
+      setMovies(responseJson.Search);
     }
   };
 
@@ -294,7 +231,7 @@ const App = () => {
     localStorage.setItem(`watchlist_${user.uid}`, JSON.stringify(newWatchlist));
   };
 
-  // Age verification
+  //Age verification
   if (!isAgeVerified) {
     return <AgeVerification onVerify={setIsAgeVerified} />;
   }
@@ -329,8 +266,8 @@ const App = () => {
   };
 
   const openLoginForm = () => {
-    setSelectedMovie(null);
-    setActiveForm('login');
+    setSelectedMovie(null);      // ✅ close movie details modal
+    setActiveForm('login');      // ✅ open login form modal
   };
 
   return (
@@ -375,7 +312,7 @@ const App = () => {
         </div>
       </Modal>
 
-      {/* Navigation Menu */}
+      {/* Auth Buttons */}
       <div className="menu-container">
         <div className="menu-toggle" onClick={toggleMenu}>☰</div>
         <div className={`menu-bar ${menuOpen ? 'open' : ''}`}>
@@ -423,6 +360,7 @@ const App = () => {
                   </button>
                 </div>
               )}
+
               </div>
             ) : (
               <div className="auth-controls">
@@ -434,16 +372,18 @@ const App = () => {
         </div>
       </div>
 
-      {/* Authentication Modals */}
+      {/* Modals */}
+      {/* Login Modal */}
       {activeForm === 'login' && (
         <div className="modal-overlay">
           <LoginForm
             switchForm={openForm}
-            onLoginSuccess={handleLoginSuccess}
+            onLoginSuccess={handleLoginSuccess} // ✅ Must be passed in
           />
         </div>
       )}
 
+      {/* Signup Modal */}
       {activeForm === 'signup' && (
         <div className="modal-overlay">
           <SignupForm 
@@ -467,61 +407,59 @@ const App = () => {
       {showAccountSettings && (
         <AccountSettings
           user={user}
-          settings={settings}
-          onSettingsChange={setSettings}
           onClose={() => setShowAccountSettings(false)}
           showToast={showToast}
         />
       )}
 
-      {/* Movie Details Modal */}
       {selectedMovie && (
         <MovieDetails
           movie={selectedMovie}
           onClose={handleCloseMovieDetails}
           user={user}
-          switchForm={openLoginForm}
+          switchForm={openLoginForm} // ✅ fixed
         />
       )}
 
       {/* Home Page */}
       {selectedTab === 'home' && (
-        <>
-          <div className="home-hero">
-            <div className="overlay">
-              <h1 className="hero-title">Welcome to C-Box 🎬</h1>
-              <input
-                type="text"
-                className="hero-search"
-                placeholder="Search for movies..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    handleHomeSearch(e.target.value);
-                  }
-                }}
-              />
-            </div>
+      <>
+        <div className="home-hero">
+          <div className="overlay">
+            <h1 className="hero-title">Welcome to C-Box 🎬</h1>
+            <input
+              type="text"
+              className="hero-search"
+              placeholder="Search for movies..."
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setSelectedTab('movies');
+                }
+              }}
+            />
           </div>
-          <Footer />
-        </>
-      )}
+        </div>
+        <Footer />
+      </>
+    )}
+
 
       {/* Movies Page */}
       {selectedTab === 'movies' && (
         <>
-          {!hasSearchResults && !isLoading ? (
+          {!hasSearchResults ? (
             <div className="movie-search-center">
               <input
                 type="text"
                 className="search-center-input"
                 placeholder="Search for movies..."
                 value={searchValue}
-                onChange={(e) => handleSearchChange(e.target.value)}
+                onChange={(e) => setSearchValue(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
-                    getMovieRequest();
+                    getMovieRequest(); // or setSelectedTab('movies');
                   }
                 }}
               />
@@ -530,34 +468,21 @@ const App = () => {
             <div className="row justify-content-center align-items-center my-4 px-3">
               <div className="row justify-content-between align-items-center mb-3 px-3">
                 <div className="text-center">
-                  <SearchBox 
-                    searchValue={searchValue} 
-                    setSearchValue={handleSearchChange}
-                  />
+                  <SearchBox searchValue={searchValue} setSearchValue={setSearchValue} />
                 </div>
               </div>
-              
-              {isLoading ? (
-                <div className="text-center">
-                  <div className="spinner-border" role="status">
-                    <span className="sr-only">Loading...</span>
-                  </div>
-                  <p>Loading movies...</p>
-                </div>
-              ) : (
-                <div className="row" id="movie-results">
-                  <MovieList
-                    movies={movies}
-                    favouriteComponent={AddFavourite}
-                    handleFavouritesClick={toggleFavorite}
-                    watchlistComponent={AddToWatchlist}
-                    handleWatchlistClick={toggleWatchlist}
-                    onMovieClick={handleMovieClick}
-                    favorites={favorites}
-                    watchlist={watchlist}
-                  />
-                </div>
-              )}
+              <div className="row">
+                <MovieList
+                  movies={movies}
+                  favouriteComponent={AddFavourite}
+                  handleFavouritesClick={toggleFavorite}
+                  watchlistComponent={AddToWatchlist}
+                  handleWatchlistClick={toggleWatchlist}
+                  onMovieClick={handleMovieClick}
+                  favorites={favorites}
+                  watchlist={watchlist}
+                />
+              </div>
             </div>
           )}
         </>
@@ -567,7 +492,7 @@ const App = () => {
       {selectedTab === 'favorites' && (
         <div className="container-fluid movie-app">
           <div className="row">
-            <MovieListHeading heading="Your Favorites" />
+            <MovieListHeading heading="" />
           </div>
           <div className="row">
             {favorites.length > 0 ? (
@@ -585,12 +510,6 @@ const App = () => {
               <div className="col-12 text-center">
                 <h3>No favorites yet</h3>
                 <p>Start adding movies to your favorites!</p>
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => setSelectedTab('movies')}
-                >
-                  Browse Movies
-                </button>
               </div>
             )}
           </div>
@@ -601,7 +520,7 @@ const App = () => {
       {selectedTab === 'watchlist' && (
         <div className="container-fluid movie-app">
           <div className="row">
-            <MovieListHeading heading="Your Watchlist" />
+            <MovieListHeading heading="" />
           </div>
           <div className="row">
             {watchlist.length > 0 ? (
@@ -619,12 +538,6 @@ const App = () => {
               <div className="col-12 text-center">
                 <h3>No movies in watchlist</h3>
                 <p>Add movies you want to watch later!</p>
-                <button 
-                  className="btn btn-primary"
-                  onClick={() => setSelectedTab('movies')}
-                >
-                  Browse Movies
-                </button>
               </div>
             )}
           </div>
@@ -633,18 +546,5 @@ const App = () => {
     </div>
   );
 };
-
-// Debounce utility function
-function debounce(func, wait) {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-}
 
 export default App;
