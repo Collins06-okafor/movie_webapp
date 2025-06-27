@@ -1,4 +1,4 @@
-/*import React from 'react';
+import React from 'react';
 
 const SearchBox = (props) => {
     return (
@@ -13,4 +13,4 @@ const SearchBox = (props) => {
     );
 };
 
-export default SearchBox;*/
+export default SearchBox;
