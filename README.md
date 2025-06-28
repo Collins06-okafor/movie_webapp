@@ -43,8 +43,7 @@ A responsive React application that allows users to search for movies using the 
 
 
 ## Live Demo
-[Link to deployed application](http://localhost:3003/)
-I haven't hosted yet
+movie-webapp-6t03gt2n8-collins06-okafors-projects.vercel.app
 
 ## Screenshots
 [Home] Screenshot 2025-06-27 144031.png
@@ -52,7 +51,7 @@ I haven't hosted yet
 [movie details] Screenshot 2025-06-27 000919.png
 
 ## Contributing
-How others can contribute
+Feedback would help
 
 ## License
 This project is open-source and available under the MIT License.
